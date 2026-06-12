@@ -86,6 +86,18 @@ def index():
     return FileResponse(STATIC / "index.html")
 
 
+@app.post("/api/voice")
+async def upload_voice(file: UploadFile = File(...)):
+    """Stores the cloning reference clip on the persistent data disk.
+
+    Kept out of the Docker image (gitignored, personal voice data) and
+    uploaded once after deploy via this endpoint instead.
+    """
+    dest = DATA_DIR / "reference_voice.wav"
+    dest.write_bytes(await file.read())
+    return {"status": "saved", "path": str(dest), "bytes": dest.stat().st_size}
+
+
 @app.post("/api/generate")
 async def generate(
     file: UploadFile = File(...),
