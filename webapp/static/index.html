@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Watts Podcast Generator</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<main class="page">
+
+  <header class="hero">
+    <h1>Watts</h1>
+    <p class="subtitle">podcast generator</p>
+  </header>
+
+  <section class="panel">
+
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="new">New Episode</button>
+      <button class="mode-btn" data-mode="reply">Reply to Journal</button>
+    </div>
+
+    <div id="drop" class="dropzone">
+      <input type="file" id="file-input" hidden />
+      <p id="drop-label">Drop a document here, or click to choose a file</p>
+      <p id="file-name" class="file-name"></p>
+    </div>
+
+    <div id="new-options" class="options">
+
+      <div class="row">
+        <label for="duration">Episode length</label>
+        <input type="range" id="duration" min="5" max="60" step="5" value="20" />
+        <span id="duration-value" class="value">20 min</span>
+      </div>
+
+      <div class="row">
+        <label for="answer-space">Answer space</label>
+        <input type="range" id="answer-space" min="0" max="60" step="5" value="20" />
+        <span id="answer-space-value" class="value">20 s</span>
+      </div>
+
+      <div class="toggles">
+        <button class="toggle on" data-target="use-arc">
+          <span class="light arc"></span>
+          <span class="toggle-label">Adaptive Arc Director</span>
+        </button>
+
+        <button class="toggle on" data-target="use-memory">
+          <span class="light memory"></span>
+          <span class="toggle-label">Living Memory Thread</span>
+        </button>
+
+        <div class="toggle steady">
+          <span class="light humour"></span>
+          <span class="toggle-label">Humour System</span>
+        </div>
+
+        <div class="toggle steady">
+          <span class="light bass"></span>
+          <span class="toggle-label">Contemplation Engine</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="generate" class="generate-btn">Generate Episode</button>
+
+    <div id="status" class="status hidden">
+      <div class="status-line">
+        <span id="status-text">Working…</span>
+        <span id="status-spinner" class="spinner"></span>
+      </div>
+      <pre id="log"></pre>
+    </div>
+
+    <div id="result" class="result hidden">
+      <p>Episode ready.</p>
+      <audio id="player" controls></audio>
+      <a id="download" class="download-link" download>Download MP3</a>
+    </div>
+
+  </section>
+
+  <footer class="ambient-toggle">
+    <button id="ambient-btn" class="ambient-btn" aria-label="Toggle ambient sound">
+      <span class="light ambient"></span>
+    </button>
+  </footer>
+
+</main>
+
+<audio id="ambient-audio" src="/api/ambient" loop></audio>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

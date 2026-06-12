@@ -14,6 +14,13 @@ watts_memory.json
 contemplation_journal.md
 *.log
 
+# keep the pre-rendered ambient loop for the web UI
+!webapp/static/ambient.wav
+
+# web app uploads/job artifacts
+webapp/uploads/*
+!webapp/uploads/.gitkeep
+
 # secrets
 .env
 .claude/

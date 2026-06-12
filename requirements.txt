@@ -16,3 +16,6 @@ numpy<2
 mutagen
 ffmpeg-normalize
 scipy
+fastapi
+uvicorn[standard]
+python-multipart
