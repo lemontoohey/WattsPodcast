@@ -1,0 +1,28 @@
+Hollow Silica Nanosphere Light Scattering
+
+When light encounters a hollow silica nanosphere with a shell thickness of
+approximately 20 nanometres and an outer diameter of 250 nanometres, the
+scattering cross-section is dominated by the refractive index contrast
+between the silica shell (n ~= 1.45) and the air-filled core (n = 1.0).
+
+This contrast creates a Mie scattering regime where the particle behaves
+as a resonant cavity for specific wavelengths of visible light, particularly
+in the blue-to-green range (450-550 nm). The hollow core acts as a low-index
+defect, concentrating the electromagnetic field at the shell-core interface
+and enhancing backscatter efficiency by a factor of three to five compared
+to solid silica spheres of equivalent total diameter.
+
+In practical terms, this means that a coating formulated with these hollow
+spheres can achieve the same opacity and brightness as a conventional
+titanium dioxide coating while using roughly forty percent less raw material
+by mass, because the scattering efficiency per particle is so much higher.
+
+The trade-off is mechanical: hollow shells are more fragile under shear
+during mixing, and the synthesis process (typically a sacrificial-template
+method using polystyrene or calcium carbonate cores that are later dissolved
+or calcined away) is more expensive per kilogram of finished pigment than
+direct precipitation methods.
+
+Current research is focused on shell-thickness uniformity, since variation
+of even a few nanometres across a batch broadens the resonance peak and
+reduces the overall whiteness index of the coating.

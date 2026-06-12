@@ -1,0 +1,19 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# generated artifacts
+*.wav
+*.mp3
+*.aiff
+raw_voice.wav
+reference_voice*.wav
+test_output.wav
+watts_memory.json
+contemplation_journal.md
+*.log
+
+# secrets
+.env
+.claude/
