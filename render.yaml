@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: watts-podcast-generator
+    runtime: docker
+    plan: standard
+    region: oregon
+    disk:
+      name: watts-data
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: BASIC_AUTH_USER
+        sync: false
+      - key: BASIC_AUTH_PASS
+        sync: false
+      - key: COQUI_TOS_AGREED
+        value: "1"
+      - key: WATTS_DATA_DIR
+        value: /data
+      - key: HOME
+        value: /data

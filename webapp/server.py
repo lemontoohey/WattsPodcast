@@ -1,25 +1,62 @@
-"""Local web UI for the Watts Podcast Generator.
+"""Web UI for the Watts Podcast Generator.
 
-Run with:
+Local dev:
     GROQ_API_KEY=... COQUI_TOS_AGREED=1 ./venv/bin/uvicorn webapp.server:app --reload
+
+Production (Docker/Render):
+    Set GROQ_API_KEY, BASIC_AUTH_USER, BASIC_AUTH_PASS, WATTS_DATA_DIR (persistent disk).
 """
+import base64
 import os
 import subprocess
+import sys
 import threading
 import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
 ROOT = Path(__file__).resolve().parent.parent
-PYTHON = ROOT / "venv" / "bin" / "python"
-UPLOADS = Path(__file__).resolve().parent / "uploads"
-UPLOADS.mkdir(exist_ok=True)
+SCRIPT = ROOT / "watts_podcast.py"
+DATA_DIR = Path(os.environ.get("WATTS_DATA_DIR", str(ROOT)))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+UPLOADS = DATA_DIR / "uploads"
+UPLOADS.mkdir(parents=True, exist_ok=True)
 STATIC = Path(__file__).resolve().parent / "static"
 
+BASIC_AUTH_USER = os.environ.get("BASIC_AUTH_USER")
+BASIC_AUTH_PASS = os.environ.get("BASIC_AUTH_PASS")
+
+
+class BasicAuthMiddleware(BaseHTTPMiddleware):
+    """Gates the whole app behind HTTP Basic Auth when credentials are configured.
+
+    Public deployments run real CPU-heavy jobs against a shared API key,
+    so an open instance would be an easy abuse/cost vector.
+    """
+
+    async def dispatch(self, request, call_next):
+        if not BASIC_AUTH_USER:
+            return await call_next(request)
+
+        auth = request.headers.get("authorization", "")
+        if auth.startswith("Basic "):
+            try:
+                decoded = base64.b64decode(auth[6:]).decode()
+                user, _, pw = decoded.partition(":")
+                if user == BASIC_AUTH_USER and pw == BASIC_AUTH_PASS:
+                    return await call_next(request)
+            except Exception:
+                pass
+
+        return Response(status_code=401, headers={"WWW-Authenticate": 'Basic realm="Watts Podcast Generator"'})
+
+
 app = FastAPI(title="Watts Podcast Generator")
+app.add_middleware(BasicAuthMiddleware)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 jobs = {}
@@ -38,7 +75,7 @@ def _run_job(job_id, cmd):
     env = os.environ.copy()
     env["COQUI_TOS_AGREED"] = "1"
     with open(log_path, "w") as logf:
-        proc = subprocess.run(cmd, cwd=str(ROOT), stdout=logf, stderr=subprocess.STDOUT, env=env)
+        proc = subprocess.run(cmd, cwd=str(DATA_DIR), stdout=logf, stderr=subprocess.STDOUT, env=env)
     log_text = log_path.read_text(errors="ignore")
     jobs[job_id]["status"] = "done" if proc.returncode == 0 else "error"
     jobs[job_id]["result"] = _parse_result(log_text)
@@ -63,10 +100,10 @@ async def generate(
     dest.write_bytes(await file.read())
 
     if mode == "reply":
-        cmd = [str(PYTHON), "watts_podcast.py", "--reply", str(dest)]
+        cmd = [sys.executable, str(SCRIPT), "--reply", str(dest)]
     else:
         cmd = [
-            str(PYTHON), "watts_podcast.py",
+            sys.executable, str(SCRIPT),
             "--input", str(dest),
             "--duration", str(duration),
             "--answer-space", str(answer_space),
@@ -96,7 +133,7 @@ def download(job_id: str):
     job = jobs.get(job_id)
     if not job or not job["result"]:
         return JSONResponse({"error": "not ready"}, status_code=404)
-    path = ROOT / job["result"]
+    path = DATA_DIR / job["result"]
     if not path.exists():
         return JSONResponse({"error": "file missing"}, status_code=404)
     return FileResponse(path, filename=path.name, media_type="audio/mpeg")
@@ -112,7 +149,7 @@ def ambient():
 
 @app.get("/api/memory")
 def memory_info():
-    mem_path = ROOT / "watts_memory.json"
+    mem_path = DATA_DIR / "watts_memory.json"
     if not mem_path.exists():
         return {"episodes": [], "threads": []}
     import json
